@@ -10,9 +10,15 @@ stack build
 stack exec example-servant-persistent
 ```
 
-Then you can query the server from a separate shell:
+Then you can query the server:
 
 ``` bash
-curl -H 'Content-type: application/json' localhost:3000/user/add --data '{"name": "Alice", "age": 42}'
-curl -H 'Content-type: application/json' localhost:3000/user/get/Alice
+# POST /users
+curl --request POST --header "Content-Type: application/json" \
+    --data '{"username": "alice", "email": "alice@me.com", "password": "ninjas"}' \
+    http://localhost:3000/users
+
+# GET /users/:username
+curl --request GET --header "Content-Type: application/json" \
+    http://localhost:3000/users/alice
 ```
