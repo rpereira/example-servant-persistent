@@ -1,6 +1,5 @@
 {-# LANGUAGE EmptyDataDecls             #-}
 {-# LANGUAGE FlexibleContexts           #-}
-{-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
@@ -11,14 +10,25 @@
 
 module Models where
 
-import Data.Aeson           (FromJSON, ToJSON)
+import Data.Aeson
 import Data.Text
+
 import Database.Persist.TH
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
-User json
+User
   name Text
   age  Int
   UniqueName name
-  deriving Show
+  deriving Eq Read Show
 |]
+
+instance FromJSON User where
+  parseJSON = withObject "User" $ \ v ->
+    User <$> v .: "name"
+         <*> v .: "age"
+
+instance ToJSON User where
+  toJSON (User name age) =
+    object [ "name" .= name
+           , "age"  .= age  ]
