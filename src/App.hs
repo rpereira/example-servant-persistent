@@ -35,14 +35,14 @@ server pool =
 
     userAdd :: User -> IO (Maybe (Key User))
     userAdd newUser = flip runSqlPersistMPool pool $ do
-      exists <- selectFirst [UserName ==. (userName newUser)] []
+      exists <- selectFirst [UserUsername ==. userUsername newUser] []
       case exists of
         Nothing -> Just <$> insert newUser
         Just _ -> return Nothing
 
     userGet :: Text -> IO (Maybe User)
     userGet name = flip runSqlPersistMPool pool $ do
-      mUser <- selectFirst [UserName ==. name] []
+      mUser <- selectFirst [UserUsername ==. name] []
       return $ entityVal <$> mUser
 
 app :: ConnectionPool -> Application
@@ -50,7 +50,7 @@ app pool = serve api $ server pool
 
 mkApp :: FilePath -> IO Application
 mkApp sqliteFile = do
-  pool <- runStderrLoggingT $ do
+  pool <- runStderrLoggingT $
     createSqlitePool (cs sqliteFile) 5
 
   runSqlPool (runMigration migrateAll) pool
